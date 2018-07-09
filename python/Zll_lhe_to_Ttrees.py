@@ -14,7 +14,7 @@ import ROOT
 dir_out_d = "/home/%s/"%(os.environ["USER"])
 parser = argparse.ArgumentParser(description = "Extracts energy-momentum 4-vectors of mu+ and mu- in lhe files and saves them in a Ttree in a root file")
 parser.add_argument("-fi","--file_in", dest = "file_in", help = "lhe file to extract di-lepton 4-vectors from", required = True)
-parser.add_argument("-do","--directory_out", dest = "directory_out", help = "lhe file to extract di-lepton 4-vectors from", default = dir_out_d)
+parser.add_argument("-do","--directory_out", dest = "directory_out", help = "output directory, default = %s"%(dir_out_d), default = dir_out_d)
 arg = parser.parse_args()
 # check the input file
 flhe = arg.file_in
@@ -37,32 +37,36 @@ if os.path.exists(out_dir):
 else:
   print "Zll_lhe_to_Ttrees.py: %s does not exist, creating..."%(out_dir)
   os.makedirs(out_dir)
-# initialize a Ttree
+# open a TFile, initialize a TTree and TLorentzVectors
 if flhe.find('/') > -1:
   lhename = flhe.split('/')[-1]
 else:
   lhename = flhe
 outname = lhename.split('.lhe')[0]
-fout = ROOT.TFile(out_dir+"Zll_4vec_"+outname+".root")
-ROOT.Ttree()
+fout = ROOT.TFile(out_dir+"Zll_4vec_"+outname+".root","CREATE")
+tree = ROOT.TTree("vector_tree", "Tree of mu+- 4-vectors (Z->mu+-)")
+mu_pos_vec = ROOT.TLorentzVector()
+mu_neg_vec = ROOT.TLorentzVector()
+tree.Branch("mu_pos_4vec","TLorentzVector",mu_pos_vec)
+tree.Branch("mu_neg_4vec","TLorentzVector",mu_neg_vec)
 # read out the energy and momenta from the lhe file
 lhe = open(flhe,"r")
-curline = ""
-while curline.find("<event>") == -1:
-  curline = lhe.readline()
-the_end = False
-end_loop_count = 0
-event_loop = 0
-muon_count = 0
 for line in lhe:
   curlist = line.split(' ')
   for i in range(curlist.count('')):
     curlist.remove('')
-  if len(curlist) == 13 and abs(int(curlist[0])) == 13:
-    muon_count += 1
-    #pxs = curlist[6]
-    #pys = curlist[7]
-    #pzs = curlist[8]
-    #ens = curlist[9]
-print "Zll_lhe_to_Ttrees.py: total number of mu+/-: %d"%(muon_count)
+  if len(curlist) == 13 and (curlist[0] == "13" or curlist[0] == "-13"):
+    pxs = curlist[6]
+    pys = curlist[7]
+    pzs = curlist[8]
+    ens = curlist[9]
+    if int(curlist[0]) == 13: #mu+
+      mu_pos_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
+    elif int(curlist[0]) == -13: #mu-
+      mu_neg_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
+  if line.find("</event>") > -1:
+    tree.Fill()
+fout.Write()
+fout.Close()
+lhe.close()
 quit()
