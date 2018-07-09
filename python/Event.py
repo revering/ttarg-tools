@@ -1,14 +1,13 @@
+import ROOT
+
 class Event:
    """
    Class for tracker as target events.
    """
 
-   def __init__(self, positive_lepton, negative_lepton):
+   def __init__(self, positive_lepton, negative_lepton, pbrem = -1, after_brem = ROOT.TLorentzVector()):
       self.lepplus = lepton1
       self.lepminus = lepton2
-
-   def set_dbrem(self, pbrem):
-      if pbrem == TRUE:
-         self.plusbrem = TRUE
-      return
+      self.plusbrem = pbrem
+      self.abrem = after_brem
 
