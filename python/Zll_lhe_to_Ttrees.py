@@ -7,6 +7,7 @@ import os
 import sys
 import argparse
 import ROOT
+import Event
 
 # assumptions: the lhe file follows the Les Houches Event File standard, with a row of 13 numbers for each particle in each event, 
 # the first being the pdgID and the seventh - tenth being the px, py, pz, and energy, respectively
@@ -47,8 +48,8 @@ fout = ROOT.TFile(out_dir+"Zll_4vec_"+outname+".root","CREATE")
 tree = ROOT.TTree("vector_tree", "Tree of mu+- 4-vectors (Z->mu+-)")
 mu_pos_vec = ROOT.TLorentzVector()
 mu_neg_vec = ROOT.TLorentzVector()
-tree.Branch("mu_pos_4vec","TLorentzVector",mu_pos_vec)
-tree.Branch("mu_neg_4vec","TLorentzVector",mu_neg_vec)
+tree.Branch("mu_pos_vec","TLorentzVector",mu_pos_vec)
+tree.Branch("mu_neg_vec","TLorentzVector",mu_neg_vec)
 # read out the energy and momenta from the lhe file
 lhe = open(flhe,"r")
 for line in lhe:
