@@ -50,22 +50,23 @@ mu_neg_vec = ROOT.TLorentzVector()
 tree.Branch("mu_pos_vec","TLorentzVector",mu_pos_vec)
 tree.Branch("mu_neg_vec","TLorentzVector",mu_neg_vec)
 # read out the energy and momenta from the lhe file
-lhe = open(flhe,"r")
-for line in lhe:
-  curlist = line.split(' ')
-  for i in range(curlist.count('')):
-    curlist.remove('')
-  if len(curlist) == 13 and (curlist[0] == "13" or curlist[0] == "-13"):
-    pxs = curlist[6]
-    pys = curlist[7]
-    pzs = curlist[8]
-    ens = curlist[9]
-    if int(curlist[0]) == 13: #mu+
-      mu_pos_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
-    elif int(curlist[0]) == -13: #mu-
-      mu_neg_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
-  if line.find("</event>") > -1:
-    tree.Fill()
+for infile in inlist:
+  lhe = open(flhe,"r")
+  for line in lhe:
+    curlist = line.split(' ')
+    for i in range(curlist.count('')):
+      curlist.remove('')
+    if len(curlist) == 13 and (curlist[0] == "13" or curlist[0] == "-13"):
+      pxs = curlist[6]
+      pys = curlist[7]
+      pzs = curlist[8]
+      ens = curlist[9]
+      if int(curlist[0]) == 13: #mu+
+        mu_pos_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
+      elif int(curlist[0]) == -13: #mu-
+        mu_neg_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
+    if line.find("</event>") > -1:
+      tree.Fill()
 fout.Write()
 fout.Close()
 lhe.close()
