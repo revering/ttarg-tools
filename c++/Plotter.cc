@@ -1,6 +1,3 @@
-#ifndef Plotter_h
-#define Plotter_h
-
 #include "TDirectory.h"
 #include "TLorentzVector.h"
 #include "TH1.h"
@@ -9,9 +6,9 @@
 
 class Plotter {
   public:
-    void book(const TDirectory* save_dir, const string sub_dir);
+    void book(TDirectory* save_dir, const string sub_dir);
     void fill(event e);
-    void write(const TDirectory* save_dir);
+    void write(TDirectory* save_dir);
     TH1* pt_pos;
     TH1* pt_neg;
     TH1* eta_pos;
@@ -21,9 +18,9 @@ class Plotter {
     TH1* inv_m;
 };
 
-void Plotter::book(const TDirectory* save_dir, const string sub_dir) {
-  save_dir->mkdir(sub_dir);
-  save_dir->cd(sub_dir);
+void Plotter::book(TDirectory* save_dir, const string sub_dir) {
+  save_dir->mkdir(sub_dir.c_str());
+  save_dir->cd(sub_dir.c_str());
   pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
   pt_neg = new TH1F("pt_neg","Transverse Momentum (mu-)",100,0,100);
   eta_pos = new TH1F("eta_pos","#eta (mu+)",100,-50,50);
@@ -34,16 +31,16 @@ void Plotter::book(const TDirectory* save_dir, const string sub_dir) {
 }
 
 void Plotter::fill(event e) {
-  pt_pos.Fill(e.mu_pos_vec.Pt());
-  pt_neg.Fill(e.mu_neg_vec.Pt());
-  eta_pos.Fill(e.mu_pos_vec.Eta());
-  eta_neg.Fill(e.mu_neg_vec.Eta());
-  phi_pos.Fill(e.mu_pos_vec.Phi());
-  phi_neg.Fill(e.mu_neg_vec.Phi());
-  inv_m.Fill(e.mu_pos_vec.M());
-  inv_m.Fill(e.mu_neg_vec.M());
+  pt_pos->Fill(e.mu_pos_vec.Pt());
+  pt_neg->Fill(e.mu_neg_vec.Pt());
+  eta_pos->Fill(e.mu_pos_vec.Eta());
+  eta_neg->Fill(e.mu_neg_vec.Eta());
+  phi_pos->Fill(e.mu_pos_vec.Phi());
+  phi_neg->Fill(e.mu_neg_vec.Phi());
+  inv_m->Fill(e.mu_pos_vec.M());
+  inv_m->Fill(e.mu_neg_vec.M());
 }
 
-void Plotter::write(const TDirectory* save_dir) {
-  save_dir.Write();
+void Plotter::write(TDirectory* save_dir) {
+  save_dir->Write();
 }
