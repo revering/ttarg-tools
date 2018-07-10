@@ -15,56 +15,80 @@ import pytools
 #parser.add_argument("--rootFiles" , dest="rootFiles" , help="The root files containing histograms you want to plot")
 #arg = parser.parse_args()
 
-file1 = sys.argv[1]
-#file2 = sys.argv[2]
-
-def plot(f1):#,f2):
-  fin1 = ROOT.TFile(f1)
-  #fin2 = ROOT.TFile(f2)
-  if not fin1.IsOpen(): #or not fin2.IsOpen():
-    print "Could not open" #one or both files, exiting..."
-    return
+# inputs: root file
+  # all_events TTree
+    # mu_pos
+    # mu_neg
+# ouputs: root file with histograms
+  # all_events TTree
+    # mu_pos
+    # mu_neg
   # histograms
-  tree = fin1.Get("vector_tree")
+    # pt
+    # eta
+    # phi
+    # inv_m
+file1 = sys.argv[1]
+
+class Plotter:
+  # Class which takes in a root file and plots pt, eta, phi, and p^2 of the particles, designed for muons from Z->dimuon events
+  def __init__(self,TFile_in):
+    self.tfin = TFile_in
+
+def plot(f1):
+  # check file
+  fin1 = ROOT.TFile(f1,"UPDATE")
+  if not fin1.IsOpen():
+    print "Could not open {0}".format(f1)
+    return
+  # access tree
+  all_tree = fin1.Get("all_events")
+  has_histograms = fin1.GetDirectory("histograms")
+  if has_histograms:
+    print "found histograms"
+  else:
+    print "didn't find histograms, making histograms directory..."
+    histograms = fin1.mkdir("histograms")
+  fin1.cd("histograms")
   mu_pos = ROOT.TLorentzVector()
   mu_neg = ROOT.TLorentzVector()
-  tree.SetBranchAddress("mu_pos_vec",mu_pos)
-  tree.SetBranchAddress("mu_neg_vec",mu_neg)
-  pxpos = ROOT.TH1F("pxp","pxp",200,-100,100)
-  pypos = ROOT.TH1F("pyp","pyp",200,-100,100)
-  pzpos = ROOT.TH1F("pzp","pzp",200,-100,100)
-  pxneg = ROOT.TH1F("pxn","pxn",200,-100,100)
-  pyneg = ROOT.TH1F("pyn","pyn",200,-100,100)
-  pzneg = ROOT.TH1F("pzn","pzn",200,-100,100)
-  for i in range(tree.GetEntries()):
-    tree.GetEntry(i)
-    pxpos.Fill(mu_pos.Px())
-    pypos.Fill(mu_pos.Py())
-    pzpos.Fill(mu_pos.Pz())
-    pxneg.Fill(mu_neg.Px())
-    pyneg.Fill(mu_neg.Py())
-    pzneg.Fill(mu_neg.Pz())
-  ROOT.gStyle.SetOptStat(0)
-  canvas = ROOT.TCanvas("canvas","Z->mumu",900,700)
-  canvas.Divide(3,2)
+  all_tree.SetBranchAddress("mu_pos_vec",mu_pos)
+  all_tree.SetBranchAddress("mu_neg_vec",mu_neg)
+  ptpos = ROOT.TH1F("ptpos","Transverse Momentum (mu+)",200,0,100)
+  ptneg = ROOT.TH1F("ptneg","Transverse Momentum (mu-)",200,0,100)
+  etapos = ROOT.TH1F("etapos","#eta (mu+)",200,-100,100)
+  etaneg = ROOT.TH1F("etaneg","#eta (mu-)",200,-100,100)
+  phipos = ROOT.TH1F("phipos","#phi (mu+)",200,-100,100)
+  phineg = ROOT.TH1F("phineg","#phi (mu-)",200,-100,100)
+  invm = ROOT.TH1F("invm","Invariant Mass (mu+)",200,-100,100)
+  for i in range(all_tree.GetEntries()):
+    all_tree.GetEntry(i)
+    ptpos.Fill(mu_pos.Pt())
+    ptneg.Fill(mu_neg.Pt())
+    etapos.Fill(mu_pos.Eta())
+    etaneg.Fill(mu_neg.Eta())
+    phipos.Fill(mu_pos.Phi())
+    phineg.Fill(mu_neg.Phi())
+    invm.Fill(mu_pos.M())
+    invm.Fill(mu_neg.M())
+  #ROOT.gStyle.SetOptStat(0)
+  canvas = ROOT.TCanvas("canvas","Z->mumu",1400,700)
+  canvas.Divide(4,2)
   canvas.cd(1)
-  pxpos.Draw()
+  ptpos.Draw()
   canvas.cd(2)
-  pypos.Draw()
+  ptneg.Draw()
   canvas.cd(3)
-  pzpos.Draw()
+  etapos.Draw()
   canvas.cd(4)
-  pxneg.Draw()
+  etaneg.Draw()
   canvas.cd(5)
-  pyneg.Draw()
+  phipos.Draw()
   canvas.cd(6)
-  pzneg.Draw()
-  #hist2 = fin2.Get("analyzer/Energy")
-  #hist1.SetLineColor(1)
-  #hist2.SetLineColor(2)
-  #hist1.Draw()
-  #hist2.Draw("SAME")
-  # job name
+  phineg.Draw()
+  canvas.cd(7)
+  invm.Draw()
+  fin1.Write()
   #name1 = pytools.find_jobname(f1)
   #name2 = pytools.find_jobname(f2)
   # legend
@@ -74,11 +98,6 @@ def plot(f1):#,f2):
   #leg.Draw()
   raw_input("waiting...")
   return
-  #fin.ls()
-
-  #ROOT.TIter current(fin.GetListOfKeys())
-  
-  #fin.GetListOfKeys().Print()
   #ROOT.gDirectory.GetListOfKeys()
   begin = datetime.datetime.now()
   print "start: "+str(begin.hour)+":"+str(begin.minute)+":"+str(begin.second)
@@ -96,4 +115,4 @@ def plot(f1):#,f2):
   pycan.SetLogx();
   # legend
   pylegend = ROOT.TLegend(0.7,0.7,0.9,0.9)
-plot(file1)#,file2)
+plot(file1)
