@@ -7,6 +7,7 @@
 class Plotter {
   public:
     void book(TDirectory* save_dir, const string sub_dir);
+    void book(TFile* save_dir, const string sub_dir);
     void fill(event e);
     void write(TDirectory* save_dir);
     TH1* pt_pos;
@@ -19,6 +20,18 @@ class Plotter {
 };
 
 void Plotter::book(TDirectory* save_dir, const string sub_dir) {
+  save_dir->mkdir(sub_dir.c_str());
+  save_dir->cd(sub_dir.c_str());
+  pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
+  pt_neg = new TH1F("pt_neg","Transverse Momentum (mu-)",100,0,100);
+  eta_pos = new TH1F("eta_pos","#eta (mu+)",100,-50,50);
+  eta_neg = new TH1F("eta_neg","#eta (mu-)",100,-50,50);
+  phi_pos = new TH1F("phi_pos","#phi (mu+)",360,0,360);
+  phi_neg = new TH1F("phi_neg","#phi (mu+)",360,0,360);
+  inv_m = new TH1F("inv_m","Invariant Mass",200,0,200);
+}
+
+void Plotter::book(TFile* save_dir, const string sub_dir) {
   save_dir->mkdir(sub_dir.c_str());
   save_dir->cd(sub_dir.c_str());
   pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
