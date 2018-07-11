@@ -508,10 +508,13 @@ double DarkPhotons::GetMadgraphE(double E0)
    double samplingE = energies[0].first;
    double efrac =0;
    int i=0;
-   while(E0>samplingE)
+   bool pass = false;
+   while(!pass)
    {
       i = i+1;
       samplingE = energies[i].first;
+      if(E0>samplingE) {pass=true;}
+      if(i>energies.size()) {pass=true;}
    }
    if(i>0) {i=i-1;}
    if(energies[i].second<efracs[energies[i].first].size())

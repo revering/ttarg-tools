@@ -12,7 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include "DarkPhotons.hh"
-#include "Plotter.cc"
+#include "Plotter.h"
 // Header file for the classes stored in the TTree if any.
 #include "TLorentzVector.h"
 #include "Event.h"
@@ -47,7 +47,7 @@ public :
    virtual void     Show(Long64_t entry = -1);
    int              Select_Lepton(event Evnt);
    TLorentzVector   simulate_dbrem(TLorentzVector initial);
-   bool             cut(event evnt);
+   bool             pass_cuts(event evnt);
    event            GetEvent(double entry);
    double           GetEntries();
 };
@@ -71,6 +71,7 @@ driver::driver(TTree *tree, double mAPrime) : fChain(0)
    map = mAPrime;
    std::string ifname = "/local/cms/user/revering/dphoton/code/geant/test.txt";
    dphoton = new DarkPhotons(map, 0., 1., 28.,14., 2.32, 1., ifname);
+   dphoton->PrepareTable();
 }
 
 driver::~driver()
@@ -173,10 +174,10 @@ TLorentzVector   driver::simulate_dbrem(TLorentzVector initial)
    return *outvec;
 }
 
-bool driver::cut(event evnt)
+bool driver::pass_cuts(event evnt)
 {
    bool pass = true;
-   if ((abs(evnt.mu_pos_vec.Eta())<2.4)||(abs(evnt.mu_neg_vec.Eta())<2.4)) {pass=false;}
+   if ((abs(evnt.mu_pos_vec.Eta())>2.4)||(abs(evnt.mu_neg_vec.Eta())>2.4)) {pass=false;}
    else if ((evnt.mu_pos_vec.Pt()<20)||(evnt.mu_neg_vec.Pt()<20)) {pass=false;}
    else
    {

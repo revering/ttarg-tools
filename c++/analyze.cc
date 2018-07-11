@@ -31,12 +31,18 @@ int main(int argc, char* argv[])
    TDirectory * indirec = f->GetDirectory("DirectoryName");
    TTree * itree = (TTree*)f->Get("all_events");
    driver dver(itree, map);
-   TFile *ofile = new TFile("outputtest.root","Create");  
-   TDirectory* after_cuts = f->mkdir("after_cuts");
+   TFile *ofile = new TFile("outputtest.root","RECREATE");  
+   TDirectory* after_cuts = ofile->mkdir("after_cuts");
    after_cuts->cd();
-   TDirectory* after_dbrem = f->mkdir("after_dbrem");
+   TDirectory* after_dbrem = after_cuts->mkdir("after_dbrem");
    after_dbrem->cd();
 
+   std::string all_name = "all_events";
+   std::string cut_name = "after_cuts";
+   std::string brem_name = "after_brem";
+   dver.all_events.book(ofile,all_name);
+   dver.after_cuts.book(after_cuts,cut_name);
+   dver.after_brem.book(after_dbrem,brem_name);
    TLorentzVector brem;
    event evnt, aft_brem;  
    int whichbrem = 0;
@@ -48,7 +54,7 @@ int main(int argc, char* argv[])
       dver.all_events.fill(evnt);
 
    //make cuts
-      if (dver.cut(evnt)==false)
+      if (dver.pass_cuts(evnt)==true)
       {
          dver.after_cuts.fill(evnt);
 
@@ -68,10 +74,12 @@ int main(int argc, char* argv[])
        }   
    }
 
-   //dver.all_events.write(itree);
-   dver.after_cuts.write(after_cuts);
-   dver.after_brem.write(after_dbrem);
-
+//   dver.all_events.write();
+//   dver.after_cuts.write(after_cuts);
+ //  dver.after_brem.write(after_dbrem);
+   
+   ofile->Write();
+   ofile->Close();
    f->Close();
 
    return 0;

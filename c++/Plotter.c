@@ -2,6 +2,7 @@
 #include "TDirectory.h"
 #include "TLorentzVector.h"
 #include "TH1.h"
+#include "TFile.h"
 #include <string>
 #include "Event.h"
 
