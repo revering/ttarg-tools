@@ -13,16 +13,17 @@ import ROOT
 
 dir_out_d = "/home/%s/"%(os.environ["USER"])
 parser = argparse.ArgumentParser(description = "Extracts energy-momentum 4-vectors of mu+ and mu- in lhe files and saves them in a Ttree in a root file")
-parser.add_argument("-fi","--file_in", dest = "file_in", help = "lhe file to extract di-lepton 4-vectors from", required = True)
+parser.add_argument("-fi","--files_in", dest = "files_in", help = "lhe file(s) to extract di-lepton 4-vectors from", required = True, nargs="+")
 parser.add_argument("-do","--directory_out", dest = "directory_out", help = "output directory, default = %s"%(dir_out_d), default = dir_out_d)
 arg = parser.parse_args()
 # check the input file
-flhe = arg.file_in
-if not os.path.isfile(flhe):
-  print "Zll_lhe_to_Ttrees.py: %s not found. Exiting..."%(flhe)
+flhe = arg.files_in
+flhe0 = flhe[0]
+if not os.path.isfile(flhe0):
+  print "Zll_lhe_to_Ttrees.py: %s not found. Exiting..."%(flhe0)
   quit()
-if flhe.split('.')[-1] != "lhe":
-  print "Zll_lhe_to_Ttrees.py: %s does not have a '.lhe' extension."%(flhe)
+if flhe0.split('.')[-1] != "lhe":
+  print "Zll_lhe_to_Ttrees.py: %s does not have a '.lhe' extension."%(flhe0)
   choice = raw_input("Continue anyway? (y/n)")
   if choice != "y":
     print "Zll_lhe_to_Ttrees.py: Exiting..."
@@ -38,11 +39,11 @@ else:
   print "Zll_lhe_to_Ttrees.py: %s does not exist, creating..."%(out_dir)
   os.makedirs(out_dir)
 # open a TFile, initialize a TTree and TLorentzVectors
-if flhe.find('/') > -1:
-  lhename = flhe.split('/')[-1]
+if flhe0.find('/') > -1:
+  lhename = flhe0.split('/')[-1]
 else:
-  lhename = flhe
-outname = lhename.split('.lhe')[0]
+  lhename = flhe0
+outname = "_".join((lhename.split('.lhe')[0]).split('_')[:-1])
 fout = ROOT.TFile(out_dir+"Zll_4vec_"+outname+".root","CREATE")
 tree = ROOT.TTree("all_events", "Tree of mu+- 4-vectors (Z->mu+-)")
 mu_pos_vec = ROOT.TLorentzVector()
@@ -50,8 +51,8 @@ mu_neg_vec = ROOT.TLorentzVector()
 tree.Branch("mu_pos_vec","TLorentzVector",mu_pos_vec)
 tree.Branch("mu_neg_vec","TLorentzVector",mu_neg_vec)
 # read out the energy and momenta from the lhe file
-for infile in inlist:
-  lhe = open(flhe,"r")
+for infile in flhe:
+  lhe = open(infile,"r")
   for line in lhe:
     curlist = line.split(' ')
     for i in range(curlist.count('')):
@@ -67,7 +68,7 @@ for infile in inlist:
         mu_neg_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
     if line.find("</event>") > -1:
       tree.Fill()
-fout.Write()
+  lhe.close()
+#fout.Write()
 fout.Close()
-lhe.close()
 quit()
