@@ -30,11 +30,6 @@ import pytools
     # inv_m
 file1 = sys.argv[1]
 
-class Plotter:
-  # Class which takes in a root file and plots pt, eta, phi, and p^2 of the particles, designed for muons from Z->dimuon events
-  def __init__(self,TFile_in):
-    self.tfin = TFile_in
-
 def plot(f1):
   # check file
   fin1 = ROOT.TFile(f1,"UPDATE")

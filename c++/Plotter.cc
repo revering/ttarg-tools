@@ -50,8 +50,9 @@ void Plotter::fill(event e) {
   eta_neg->Fill(e.mu_neg_vec.Eta());
   phi_pos->Fill(e.mu_pos_vec.Phi());
   phi_neg->Fill(e.mu_neg_vec.Phi());
-  inv_m->Fill(e.mu_pos_vec.M());
-  inv_m->Fill(e.mu_neg_vec.M());
+  //FIX
+  TLorentzVector sum = e.mu_pos_vec+e.mu_neg_vec;
+  inv_m->Fill(sum.M());
 }
 
 void Plotter::write(TDirectory* save_dir) {
