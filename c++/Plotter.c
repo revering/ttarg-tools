@@ -5,17 +5,18 @@
 #include "TFile.h"
 #include <string>
 #include "Event.h"
+#include "TMath.h"
 
 void Plotter::book(TDirectory* save_dir, const std::string sub_dir) {
   save_dir->mkdir(sub_dir.c_str());
   save_dir->cd(sub_dir.c_str());
   pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
   pt_neg = new TH1F("pt_neg","Transverse Momentum (mu-)",100,0,100);
-  eta_pos = new TH1F("eta_pos","#eta (mu+)",160,-8,8);
-  eta_neg = new TH1F("eta_neg","#eta (mu-)",160,-8,8);
-  phi_pos = new TH1F("phi_pos","#phi (mu+)",100,-6.28,6.28);
-  phi_neg = new TH1F("phi_neg","#phi (mu+)",100,-6.28,6.28);
-  inv_m = new TH1F("inv_m","Invariant Mass",200,0,200);
+  eta_pos = new TH1F("eta_pos","#eta (mu+)",160,-10,10);
+  eta_neg = new TH1F("eta_neg","#eta (mu-)",160,-10,10);
+  phi_pos = new TH1F("phi_pos","#phi (mu+)",100,-TMath::Pi(),TMath::Pi());
+  phi_neg = new TH1F("phi_neg","#phi (mu+)",100,-TMath::Pi(),TMath::Pi());
+  inv_m = new TH1F("inv_m","Invariant Mass",150,0,150);
 }
 
 void Plotter::book(TFile* save_dir, const std::string sub_dir) {
@@ -23,11 +24,11 @@ void Plotter::book(TFile* save_dir, const std::string sub_dir) {
   save_dir->cd(sub_dir.c_str());
   pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
   pt_neg = new TH1F("pt_neg","Transverse Momentum (mu-)",100,0,100);
-  eta_pos = new TH1F("eta_pos","#eta (mu+)",160,-8,8);
-  eta_neg = new TH1F("eta_neg","#eta (mu-)",160,-8,8);
-  phi_pos = new TH1F("phi_pos","#phi (mu+)",100,-6.28,6.28);
-  phi_neg = new TH1F("phi_neg","#phi (mu+)",100,-6.28,6.28);
-  inv_m = new TH1F("inv_m","Invariant Mass",200,0,200);
+  eta_pos = new TH1F("eta_pos","#eta (mu+)",160,-10,10);
+  eta_neg = new TH1F("eta_neg","#eta (mu-)",160,-10,10);
+  phi_pos = new TH1F("phi_pos","#phi (mu+)",100,-TMath::Pi(),TMath::Pi());
+  phi_neg = new TH1F("phi_neg","#phi (mu+)",100,-TMath::Pi(),TMath::Pi());
+  inv_m = new TH1F("inv_m","Invariant Mass",150,0,150);
 }
 
 void Plotter::fill(event e) {
