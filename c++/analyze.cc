@@ -10,16 +10,18 @@
 
 int main(int argc, char* argv[])
 {
-   std::string fname;
+   std::string fname, scalefile, strmap;
    double map;
-   if(argc==3)
+   if(argc==4)
    {
       fname = argv[1];
       map = atof(argv[2]);
+      scalefile = argv[3];
+      strmap = argv[2];
    }
    else
    {
-      std::cerr << "Please enter a file name.\n";
+      std::cerr << "Please enter a root file, A' mass, and scaling file.\n";
       exit(1);
    }
    TFile *f = new TFile(fname.c_str(),"READ");
@@ -30,8 +32,9 @@ int main(int argc, char* argv[])
    }
    TDirectory * indirec = f->GetDirectory("DirectoryName");
    TTree * itree = (TTree*)f->Get("all_events");
-   driver dver(itree, map);
-   TFile *ofile = new TFile("outputtest.root","RECREATE");  
+   driver dver(itree, map, scalefile);
+   std::string ofname = "Zll_dbrem_map_" + strmap + ".root";
+   TFile *ofile = new TFile(ofname.c_str(),"RECREATE");  
    TDirectory* after_cuts = ofile->mkdir("after_cuts");
    after_cuts->cd();
    TDirectory* after_dbrem = after_cuts->mkdir("after_dbrem");

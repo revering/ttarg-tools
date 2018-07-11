@@ -36,7 +36,7 @@ public :
    TBranch        *b_mu_pos_vec;   //!
    TBranch        *b_mu_neg_vec;   //!
 
-   driver(TTree *tree=0, double mAPrime=1.0);
+   driver(TTree *tree=0, double mAPrime=1.0, std::string ifname = "");
    virtual ~driver();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -55,7 +55,7 @@ public :
 #endif
 
 #ifdef driver_cxx
-driver::driver(TTree *tree, double mAPrime) : fChain(0) 
+driver::driver(TTree *tree, double mAPrime, std::string ifname) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -69,7 +69,6 @@ driver::driver(TTree *tree, double mAPrime) : fChain(0)
    }
    Init(tree);
    map = mAPrime;
-   std::string ifname = "/local/cms/user/revering/dphoton/code/geant/test.txt";
    dphoton = new DarkPhotons(map, 0., 1., 28.,14., 2.32, 1., ifname);
    dphoton->PrepareTable();
 }
