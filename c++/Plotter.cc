@@ -1,3 +1,5 @@
+#ifndef plotter_c
+#define plotter_c
 #include "TDirectory.h"
 #include "TLorentzVector.h"
 #include "TH1.h"
@@ -57,3 +59,5 @@ void Plotter::fill(event e) {
 void Plotter::write(TDirectory* save_dir) {
   save_dir->Write();
 }
+
+#endif

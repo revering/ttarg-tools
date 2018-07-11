@@ -31,7 +31,7 @@ if infileType != ".root":
      quit()
 
 rfile = ROOT.TFile(arg.rootfile,"UPDATE")
-tree = rfile.Get("vector_tree")
+tree = rfile.Get("all_events")
 pvec = ROOT.TLorentzVector()
 mvec = ROOT.TLorentzVector()
 
