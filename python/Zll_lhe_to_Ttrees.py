@@ -19,6 +19,7 @@ arg = parser.parse_args()
 # check the input file
 flhe = arg.files_in
 flhe0 = flhe[0]
+print "flhe0: "+flhe0
 if not os.path.isfile(flhe0):
   print "Zll_lhe_to_Ttrees.py: %s not found. Exiting..."%(flhe0)
   quit()
@@ -51,6 +52,7 @@ mu_neg_vec = ROOT.TLorentzVector()
 tree.Branch("mu_pos_vec","TLorentzVector",mu_pos_vec)
 tree.Branch("mu_neg_vec","TLorentzVector",mu_neg_vec)
 # read out the energy and momenta from the lhe file
+fill_count = 0
 for infile in flhe:
   lhe = open(infile,"r")
   for line in lhe:
@@ -63,12 +65,17 @@ for infile in flhe:
       pzs = curlist[8]
       ens = curlist[9]
       if int(curlist[0]) == 13: #mu+
+        #print "found mu+ !"
         mu_pos_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
       elif int(curlist[0]) == -13: #mu-
+        #print "found mu- !"
         mu_neg_vec.SetPxPyPzE(float(pxs),float(pys),float(pzs),float(ens))
     if line.find("</event>") > -1:
       tree.Fill()
+      fill_count += 1
+  print "fill_count: "+str(fill_count)
   lhe.close()
-#fout.Write()
+fout.Write()
+fout.Delete("all_events;2")
 fout.Close()
 quit()
