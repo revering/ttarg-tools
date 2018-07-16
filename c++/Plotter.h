@@ -19,6 +19,11 @@ class Plotter {
     TH1* phi_pos;
     TH1* phi_neg;
     TH1* inv_m;
+    TH1* pt_change;
+    TH1* pt_brem;
+    TH1* eta_brem;
+    TH1* inv_pt_change;
+    TH1* pt_ratio;
 };
 
 #endif

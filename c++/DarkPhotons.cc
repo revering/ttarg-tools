@@ -130,7 +130,7 @@ ANucl(ANuclIn), ZNucl(ZNuclIn), Density(DensityIn), epsilBench(0.0001), epsil(ep
 AccumulatedProbability(0.)
 {
    nptable = NPTAB;
-   double epi[NPTAB]={0.008, 0.02, 0.05, 0.1, 0.2, 0.5, 1., 2., 5., 10., 15., 25., 50., 80., 150.};
+   double epi[NPTAB]={MA+Mmu, MA+Mmu+.1,MA+Mmu+2., MA+Mmu+10., MA+Mmu+20., MA+Mmu+50., MA+Mmu+100., MA+Mmu+150., MA+Mmu+250., MA+Mmu+500., MA+Mmu+800., MA+Mmu+1500., MA+Mmu+2000., MA+Mmu+2500., MA+Mmu+4000.};
    for(int ip=0; ip < nptable; ip++) {ep[ip] = epi[ip];}
    ifile.open(fname.c_str());
    if (!ifile)
@@ -417,6 +417,12 @@ void DarkPhotons::PrepareTable()
 
 double DarkPhotons::GetsigmaTot(double E0)
 {
+  if(E0<(MA+Mmu))
+  {
+     return 0;
+  }
+  double st = parinv(E0, ep, sigmap, nptable);
+  if(st<0) {return TotalMuCrossSectionCalc(E0);}
   return parinv(E0, ep, sigmap, nptable);
 }
 
@@ -557,7 +563,7 @@ TLorentzVector* DarkPhotons::MuSimulateEmission(double E0)
          return fParticle;
       }
    }   
-   printf ("Did not manage to simulate!. Xacc: %e\n", XAcc);
+   printf ("Did not manage to simulate!. Xacc: %e, E0: %e\n", XAcc, E0);
 
    return fParticle; // did not manage to simulate
 }

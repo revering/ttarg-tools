@@ -8,10 +8,10 @@ class event
    public:
       TLorentzVector mu_pos_vec;
       TLorentzVector mu_neg_vec;
-      bool           pbrem;
+      int           pbrem;
       TLorentzVector pre_brem_vec;
 
-      event(TLorentzVector pvec, TLorentzVector mvec, bool posbrem, TLorentzVector pre_vec);
+      event(TLorentzVector pvec, TLorentzVector mvec, int posbrem, TLorentzVector pre_vec);
       event(TLorentzVector pvec, TLorentzVector mvec);
       event();
       virtual ~event();
