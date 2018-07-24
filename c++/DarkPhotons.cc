@@ -444,67 +444,32 @@ bool DarkPhotons::Emission(double E0, double DensityMat, double StepLength)
   return false;
 }
 
-momentum DarkPhotons::SimulateEmission(double E0)
+TLorentzVector* DarkPhotons::SimulateEmission(double E0)
 {
-   momentum fParticle;
-   double Xmin = MA/E0;
-   double Xmax = 0.998;
-//   double ThetaMaxA = pow(MA/E0,1.5);
-   double ThetaMaxA = 0.06;
-   double ThetaMaxEl = sqrt(MA*Mel)/E0;
-   double integratedX = -log(MA*MA*(1-Xmax))/MA/MA;
-//   double integratedX = -log(MA*MA*0.05*(1-Xmax))/MA/MA*20.;
-   double XAcc, ThetaAcc, PhiAcc;
-//   srand (time(NULL));
-   double PhiEv = drand48() * 2. * 3.1415962;
-   double ThetaConst = 100.;
+   TLorentzVector* fParticle = new TLorentzVector;
+   double Eout, Theta, Phi, Eta;
+   double XAcc = GetMadgraphE(E0);
+   double width = 1/sqrt((XAcc-Mel)/(E0-MA-Mel)/0.8/sqrt(MA)+1.4/MA;
+   double integratedPx = 1./width-exp(-width*XAcc)/width;
    for( int iii = 1; iii < 10000; iii++) 
    {
-       
-      double A  = drand48() * integratedX;
-      double XEv = (-exp(-MA*MA*A)+MA*MA)/MA/MA;
-      double intTheta = 1./ThetaConst*log(1./ThetaConst/20.+ThetaMaxA);
-      double intTzero = 1./ThetaConst*log(1./ThetaConst/20.);
-      double B  = drand48()*(intTzero-intTheta)+intTheta;
-      double ThetaEv = -1./ThetaConst/20. + exp(ThetaConst*B);
-      double smax = 18./(MA*MA*(1.-XEv))/(ThetaConst*ThetaEv+MA/E0)/E0/E0;
-      double UU = drand48() * smax;
-//      printf("XEv: %e ThetaEv: %e, B: %e\n",XEv,ThetaEv,B);
-
-/*      double A = drand48() * integratedX;
-      double XEv = (-exp(-MA*MA*0.05*A)+MA*MA*0.05)/MA/MA/0.05;
-      double ThetaEv = drand48() * ThetaMaxA;
-      double smax = 1./(MA*MA*0.05*(1.-XEv));
-      double UU = drand48() * smax;
-*/
-      double Uxtheta = E0*E0*ThetaEv*ThetaEv*XEv + MA*MA*(1.0-XEv)/XEv + Mel*Mel*XEv;
-      double AA = (1. - XEv + XEv*XEv/2.) / (Uxtheta*Uxtheta);
-      double BB = (1. - XEv)*(1. - XEv)*MA*MA/(Uxtheta*Uxtheta*Uxtheta*Uxtheta);
-      double CC = MA*MA - Uxtheta*XEv/(1. - XEv);
-      double sigma = ThetaEv * XEv * (AA + BB*CC);
-//      printf("Sigma: %e Smax: %e X: %e CapMax: %e\n", sigma, smax, XEv, capMax);
-      if(sigma > smax)  printf ("Maximum violated: ratio = % .18f, X: %e, Theta: %e\n", sigma/smax, XEv, ThetaEv);
-
-      if(sigma >= UU) 
+      double PxA = drand48()*integratedPx;
+      double PyA = drand48()*integratedPx;
+      double Px = -log(1-PxA*width)/width;
+      double Py = -log(1-PyA*width)/width;
+      double Pt = sqrt(Px*Px+Py*Py);
+      if (Py*Pt+Mmu*Mmu < XAcc*XAcc)
       {
-         if(ThetaEv>ThetaMaxA) printf("!!!\n");
-         XAcc = XEv;
-         ThetaAcc = ThetaEv;
-         PhiAcc = PhiEv;
-         fParticle.E0 = XAcc;
-         fParticle.Theta = ThetaAcc;
-         fParticle.Phi = PhiAcc;
-//       printf ("Accepted at iteration %d, X: %e, Theta: %e\n", iii, XEv, ThetaEv);
-//       printf( "Ee = %e XAcc = %e ThetaAcc = %e\n ", E0, XAcc, ThetaAcc);
-
-         return fParticle;
+         double P = sqrt(XAcc*XAcc-Mel*Mel);
+	 Eout = XAcc;
+	 Theta = asin(Pt/P);
+	 Eta = -log(tan(Theta/2.));
+	 Phi = drand48()*2.*3.14159;
+	 fParticle->SetPtEtaPhiE(Pt,Eta,Phi,Eout);
+	 return fParticle;
       }
    }
    printf ("Did not manage to simulate !.\n");
-
-   fParticle.E0 = 0.;
-   fParticle.Theta = 0.;
-   fParticle.Phi = 0.;
 
    return fParticle; // did not manage to simulate
 }
@@ -519,8 +484,8 @@ double DarkPhotons::GetMadgraphE(double E0)
    {
       i = i+1;
       samplingE = energies[i].first;
-      if(E0>samplingE) {pass=true;}
-      if(i>energies.size()) {pass=true;}
+      if(E0<=samplingE) {pass=true;}
+      if(i>=energies.size()) {pass=true;}
    }
    if(i>0) {i=i-1;}
    if(energies[i].second<efracs[energies[i].first].size())
