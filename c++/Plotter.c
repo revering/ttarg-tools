@@ -21,7 +21,7 @@ void Plotter::book(TDirectory* save_dir, const std::string sub_dir) {
   inv_pt_change = new TH1F("inverse_pt_change","Inverse Pt Change",200,0,1);
   pt_brem = new TH1F("pt_brem","Transverse Momentum Of Brem Muon",100,0,100);
   pt_ratio = new TH1F("pt_ratio","Brem Pt Ratio",200,0,1);
-  eta_brem = new TH1F("eta_brem","#eta (mu+)",160,-10,10);
+  eta_brem = new TH1F("eta_brem","#eta (brem)",160,-10,10);
   int_pt_ratio = new TH1F("int_pt_ratio", "Integrated Pt Ratio", 200,0,1);
 }
 
@@ -42,7 +42,7 @@ void Plotter::book(TFile* save_dir, const std::string sub_dir) {
   pt_brem = new TH1F("pt_brem","Transverse Momentum of Brem Muon",100,0,100);
   inv_pt_change = new TH1F("inverse_pt_change","Inverse Pt Change",200,0,1);
   pt_ratio = new TH1F("pt_ratio","Brem Pt Ratio",200,0,1);
-  eta_brem = new TH1F("eta_brem","#eta (mu+)",160,-10,10);
+  eta_brem = new TH1F("eta_brem","#eta (brem)",160,-10,10);
   int_pt_ratio = new TH1F("int_pt_ratio", "Integrated Pt Ratio", 200,0,1);
 }
 

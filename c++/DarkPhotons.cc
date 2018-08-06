@@ -449,7 +449,7 @@ TLorentzVector* DarkPhotons::SimulateEmission(double E0)
    TLorentzVector* fParticle = new TLorentzVector;
    double Eout, Theta, Phi, Eta;
    double XAcc = GetMadgraphE(E0);
-   double width = 1/sqrt((XAcc-Mel)/(E0-MA-Mel)/0.8/sqrt(MA)+1.4/MA;
+   double width = 1/sqrt((XAcc-Mel)/(E0-MA-Mel))/0.8/sqrt(MA)+1.4/MA;
    double integratedPx = 1./width-exp(-width*XAcc)/width;
    for( int iii = 1; iii < 10000; iii++) 
    {

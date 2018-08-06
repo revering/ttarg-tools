@@ -48,7 +48,10 @@ public :
    virtual void     Show(Long64_t entry = -1);
    int              Select_Lepton(event Evnt);
    TLorentzVector   simulate_dbrem(TLorentzVector initial);
-   bool             pass_post_cuts(event evnt);
+   bool             pass_cuts(event evnt);
+   bool             eta_cuts(TLorentzVector muon, TLorentzVector track);
+   bool             pt_cuts(TLorentzVector muon, TLorentzVector track);
+   bool             dr_cuts(TLorentzVector muon, TLorentzVector track);
    bool             pass_inv_mass(event evnt);
    event            GetEvent(double entry);
    double           GetEntries();
@@ -189,23 +192,60 @@ bool driver::pass_inv_mass(event evnt)
 {
    bool pass = true;
    TLorentzVector invmass = evnt.mu_neg_vec+evnt.mu_pos_vec;
-   if ((invmass.M()<60)||(invmass.M()>120)) {pass=false;}
+   if ((invmass.M()<81.2)||(invmass.M()>101.2)) {pass=false;}
    return pass;
 }
 
-bool driver::pass_post_cuts(event evnt)
+bool driver::pass_cuts(event evnt)
 {
    bool pass = true;
+   TLorentzVector muon, track;
    if(evnt.pbrem==1)
    {
-      if ((abs(evnt.mu_pos_vec.Eta())>2.4)||(abs(evnt.mu_neg_vec.Eta())>2.1)) {pass=false;}
+      muon = evnt.mu_neg_vec;
+      track = evnt.pre_brem_vec;
    }
    else if(evnt.pbrem==-1)
    {
-      if ((abs(evnt.mu_pos_vec.Eta())>2.1)||(abs(evnt.mu_neg_vec.Eta())>2.4)) {pass=false;}
+      muon = evnt.mu_pos_vec;
+      track = evnt.pre_brem_vec;
    }
-   else {if ((abs(evnt.mu_pos_vec.Eta())>2.1)||(abs(evnt.mu_neg_vec.Eta())>2.1)) {pass=false;}}
-   if ((evnt.mu_pos_vec.Pt()<20)&&(evnt.mu_neg_vec.Pt()<20)) {pass=false;}
+   else {pass=false;}
+   if(pt_cuts(muon,track)==false) {pass=false;}
+   else if(eta_cuts(muon,track)==false) {pass=false;}
+   else if(dr_cuts(muon,track)==false) {pass=false;}
+   
+   return pass;
+}
+
+bool driver::pt_cuts(TLorentzVector muon, TLorentzVector track)
+{
+   bool pass = true;
+   if(muon.Pt()<25) {pass=false;}
+   else if(track.Pt()<30) {pass=false;}
+   return pass;
+}
+
+bool driver::eta_cuts(TLorentzVector muon, TLorentzVector track)
+{
+   bool pass = true;
+   double m_eta = muon.Eta();
+   double t_eta = track.Eta();
+   if (t_eta<0) {t_eta=t_eta*-1.;}
+   if (m_eta<0) {m_eta=m_eta*-1.;}
+   if(m_eta>2.1) {pass=false;}
+   else if(t_eta>2.1) {pass=false;}
+   else if((t_eta>0.15)&&(t_eta<0.35)) {pass=false;}
+   else if((t_eta>1.42)&&(t_eta<1.65)) {pass=false;}
+   else if((t_eta>1.55)&&(t_eta<1.85)) {pass=false;}
+   return pass;
+}
+
+bool driver::dr_cuts(TLorentzVector muon, TLorentzVector track)
+{
+   bool pass = true;
+   double dr = sqrt((track.Eta()-muon.Eta())*(track.Eta()-muon.Eta())+(track.Phi()-muon.Phi())*(track.Phi()-muon.Phi()));
+   if(dr<0.15) {pass=false;}
    return pass;
 }
 

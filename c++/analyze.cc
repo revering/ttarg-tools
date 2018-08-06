@@ -1,4 +1,4 @@
-//To compile : g++ dbrem.cc -o simulate `root-config --cflags --glibs` DarkPhotons.cc -lgsl -lgslcblas -lm
+//To compile : g++ analyze.cc -o analyze `root-config --cflags --glibs` DarkPhotons.cc Event.c Plotter.c driver.c -lgsl -lgslcblas -lm
 #include "DarkPhotons.hh"
 #include "driver.h"
 #include "TFile.h"
@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
    std::string ofname = "Zll_dbrem_map_" + strmap + ".root";
    TFile *ofile = new TFile(ofname.c_str(),"RECREATE");
    TDirectory* inv_mass = ofile->mkdir("inv_mass_cut");
-   TDirectory* after_dbrem = inv_mass->mkdir("after_dbrem");
-   TDirectory* after_cuts = after_dbrem->mkdir("after_cuts");
+   TDirectory* after_cuts = inv_mass->mkdir("after_cuts");
+   TDirectory* after_dbrem = after_cuts->mkdir("after_dbrem");
 
    std::string all_name = "all_events";
    std::string inv_name = "inv_mass_cut";
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
    dver.after_brem.book(after_dbrem,brem_name);
    dver.inv_mass_cut.book(inv_mass,inv_name);
    TLorentzVector brem;
-   event evnt, aft_brem;  
+   event evnt, aft_brem, aft_cuts;  
    int whichbrem = 0;
    int nprecuts = 0;
    int npostmass = 0;
@@ -72,32 +72,20 @@ int main(int argc, char* argv[])
          {
             brem = dver.simulate_dbrem(evnt.mu_pos_vec);
             aft_brem = event(brem, evnt.mu_neg_vec, whichbrem, evnt.mu_pos_vec);
+	    aft_cuts = event(evnt.mu_pos_vec, evnt.mu_neg_vec, whichbrem, evnt.mu_pos_vec);
          }
          if (whichbrem == -1)
          {
             brem = dver.simulate_dbrem(evnt.mu_neg_vec);
             aft_brem = event(evnt.mu_pos_vec, brem, whichbrem, evnt.mu_neg_vec);
-         }
+            aft_cuts = event(evnt.mu_pos_vec, evnt.mu_neg_vec, whichbrem, evnt.mu_neg_vec);
+	 }
 
-         dver.after_brem.fill(aft_brem);
-         if(whichbrem==1)
-	 {
-	    if((abs(evnt.mu_pos_vec.Eta())<2.4)&&(abs(evnt.mu_neg_vec.Eta())<2.1))
-	    {
-	       nposteta++;
-	    }
-	 }
-	 if(whichbrem==-1)   
-	 {
-            if((abs(evnt.mu_pos_vec.Eta())<2.1)&&(abs(evnt.mu_neg_vec.Eta())<2.4))
-	    {
-	       nposteta++;
-	    }
-	 }
-         //make cuts
-         if (dver.pass_post_cuts(aft_brem)==true)
+	 //make cuts
+         if (dver.pass_cuts(aft_cuts)==true)
          {
-            dver.after_cuts.fill(aft_brem);
+	    dver.after_cuts.fill(aft_cuts);
+            dver.after_brem.fill(aft_brem);
 	    npostpt++;
          }
       }	 
@@ -106,10 +94,10 @@ int main(int argc, char* argv[])
    printf("Pre cuts: %d, Post mass: %d, Post eta: %d, Post pt: %d\n", nprecuts, npostmass, nposteta, npostpt);
 
 //   dver.all_events.write();
-//   dver.after_cuts.write(after_cuts);
- //  dver.after_brem.write(after_dbrem);
-   
-   ofile->Write();
+   dver.after_cuts.write();
+   dver.after_brem.write();
+  
+   ofile->Write();   
    ofile->Close();
    f->Close();
 
