@@ -45,7 +45,7 @@ class DarkPhotons
     double GetsigmaTot(double E0);
     double GetsigmaMax(double E0);
     bool Emission(double E0, double DensityMat, double StepLength); // E0 in GeV, density in g/cm3, StepLength in mm
-    momentum SimulateEmission(double E0);
+    TLorentzVector* SimulateEmission(double E0);
     TLorentzVector* MuSimulateEmission(double E0);
     double GetAccumulatedProbability() {return AccumulatedProbability;}
     double GetMadgraphE(double E0);

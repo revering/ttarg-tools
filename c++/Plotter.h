@@ -10,8 +10,12 @@ class Plotter {
   public:
     void book(TDirectory* save_dir, const std::string sub_dir);
     void book(TFile* save_dir, const std::string sub_dir);
+    TDirectory* root_dir;
+    std::string hist_dir;
+    void integrate(TH1* inthist, TH1* initial);
     void fill(event e);
-    void write(TDirectory* save_dir);
+    void write();
+    void fill_int();
     TH1* pt_pos;
     TH1* pt_neg;
     TH1* eta_pos;
@@ -24,6 +28,7 @@ class Plotter {
     TH1* eta_brem;
     TH1* inv_pt_change;
     TH1* pt_ratio;
+    TH1* int_pt_ratio;
 };
 
 #endif

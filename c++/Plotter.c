@@ -22,12 +22,15 @@ void Plotter::book(TDirectory* save_dir, const std::string sub_dir) {
   pt_brem = new TH1F("pt_brem","Transverse Momentum Of Brem Muon",100,0,100);
   pt_ratio = new TH1F("pt_ratio","Brem Pt Ratio",200,0,1);
   eta_brem = new TH1F("eta_brem","#eta (mu+)",160,-10,10);
+  int_pt_ratio = new TH1F("int_pt_ratio", "Integrated Pt Ratio", 200,0,1);
 }
 
 
 void Plotter::book(TFile* save_dir, const std::string sub_dir) {
   save_dir->mkdir(sub_dir.c_str());
   save_dir->cd(sub_dir.c_str());
+  root_dir = save_dir;
+  hist_dir = sub_dir;
   pt_pos = new TH1F("pt_pos","Transverse Momentum (mu+)",100,0,100);
   pt_neg = new TH1F("pt_neg","Transverse Momentum (mu-)",100,0,100);
   eta_pos = new TH1F("eta_pos","#eta (mu+)",160,-10,10);
@@ -40,6 +43,7 @@ void Plotter::book(TFile* save_dir, const std::string sub_dir) {
   inv_pt_change = new TH1F("inverse_pt_change","Inverse Pt Change",200,0,1);
   pt_ratio = new TH1F("pt_ratio","Brem Pt Ratio",200,0,1);
   eta_brem = new TH1F("eta_brem","#eta (mu+)",160,-10,10);
+  int_pt_ratio = new TH1F("int_pt_ratio", "Integrated Pt Ratio", 200,0,1);
 }
 
 void Plotter::fill(event e) {
@@ -69,6 +73,25 @@ void Plotter::fill(event e) {
   }
 }
 
-void Plotter::write(TDirectory* save_dir) {
-  save_dir->Write();
+void Plotter::integrate(TH1* inthist, TH1* initial)
+{
+   Int_t nbins = initial->GetNbinsX();
+   Int_t sum = 0;
+   for(int i=0;i<=nbins;i++)
+   {
+      inthist->SetBinContent(i,initial->GetBinContent(i)+sum);
+      sum = inthist->GetBinContent(i);
+   }
+   if(initial->GetEntries()!=0) 
+   {
+      inthist->Scale(1/initial->GetEntries());
+      inthist->SetEntries(initial->GetEntries());
+   }
+   return;
+}
+
+void Plotter::write() 
+{
+//   root_dir->cd(hist_dir.c_str());
+   integrate(int_pt_ratio, pt_ratio);
 }
