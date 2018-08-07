@@ -1,12 +1,7 @@
 #include "Plotter.h"
-#include "TDirectory.h"
-#include "TLorentzVector.h"
-#include "TH1.h"
-#include "TFile.h"
-#include <string>
-#include "Event.h"
-#include "TMath.h"
 
+//Functions to create the histograms in the desired TDirectory.
+//Overloaded to allow providing a TFile instead of a TDirectory.
 void Plotter::book(TDirectory* save_dir, const std::string sub_dir) {
   save_dir->mkdir(sub_dir.c_str());
   save_dir->cd(sub_dir.c_str());
@@ -55,25 +50,22 @@ void Plotter::fill(event e) {
   phi_neg->Fill(e.mu_neg_vec.Phi());
   TLorentzVector sum = e.mu_pos_vec+e.mu_neg_vec;
   inv_m->Fill(sum.M());
-  if(e.pbrem==1)
-  {
-     pt_brem->Fill(e.mu_pos_vec.Pt());
-     eta_brem->Fill(e.mu_pos_vec.Eta());
-     pt_change->Fill(e.pre_brem_vec.Pt()-e.mu_pos_vec.Pt());
-     inv_pt_change->Fill(-1./e.pre_brem_vec.Pt()+1./e.mu_pos_vec.Pt());
-     pt_ratio->Fill(e.mu_pos_vec.Pt()/e.pre_brem_vec.Pt());
-  }
-  else if(e.pbrem==-1)
-  {
-     pt_brem->Fill(e.mu_neg_vec.Pt());
-     eta_brem->Fill(e.mu_neg_vec.Eta());
-     pt_change->Fill(e.pre_brem_vec.Pt()-e.mu_neg_vec.Pt());
-     inv_pt_change->Fill(1./e.mu_neg_vec.Pt()-1./e.pre_brem_vec.Pt());
-     pt_ratio->Fill(e.mu_neg_vec.Pt()/e.pre_brem_vec.Pt());
-  }
+  TLorentzVector brem;
+  if(e.pbrem==0){return;} //Check if it has bremmed yet.
+  //Find which lepton was chosen.
+  else if(e.pbrem==1){brem = e.mu_pos_vec;}
+  else if(e.pbrem==-1){brem = e.mu_neg_vec;}
+  pt_brem->Fill(brem.Pt());
+  eta_brem->Fill(brem.Eta());
+  pt_change->Fill(e.pre_brem_vec.Pt()-brem.Pt());
+  inv_pt_change->Fill(1./brem.Pt()-1./e.pre_brem_vec.Pt());
+  pt_ratio->Fill(brem.Pt()/e.pre_brem_vec.Pt());
+  return;
 }
 
 void Plotter::integrate(TH1* inthist, TH1* initial)
+//Creates an integrated histogram of the second entry in the first entry.
+//Needs to be called after all entries have been added.
 {
    Int_t nbins = initial->GetNbinsX();
    Int_t sum = 0;
@@ -91,6 +83,8 @@ void Plotter::integrate(TH1* inthist, TH1* initial)
 }
 
 void Plotter::write() 
+//Doesn't actually write currently. Just called to create the integrated histograms at the
+//end of the analysis.
 {
 //   root_dir->cd(hist_dir.c_str());
    integrate(int_pt_ratio, pt_ratio);

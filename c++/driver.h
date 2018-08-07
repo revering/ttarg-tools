@@ -1,9 +1,8 @@
-//////////////////////////////////////////////////////////
-// This class has been automatically generated on
-// Tue Jul 10 11:53:05 2018 by ROOT version 6.12/06
-// from TTree all_events/Tree of mu+- 4-vectors (Z->mu+-)
-// found on file: Zll_4vec_cmsgrid_final_RandomSeed_0.root
-//////////////////////////////////////////////////////////
+/**
+ * @file driver.h
+ * @brief Class driving the dark brem simulation + analysis.
+ * @author Michael Revering, University of Minnesota
+ */
 
 #ifndef driver_h
 #define driver_h
@@ -17,6 +16,7 @@
 #include "TLorentzVector.h"
 #include "Event.h"
 
+//Class to load in tfiles, store histograms, and hold functions for performing analysis.
 class driver {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -51,7 +51,7 @@ public :
    bool             pass_cuts(event evnt);
    bool             eta_cuts(TLorentzVector muon, TLorentzVector track);
    bool             pt_cuts(TLorentzVector muon, TLorentzVector track);
-   bool             dr_cuts(TLorentzVector muon, TLorentzVector track);
+   bool             dot_cuts(TLorentzVector muon, TLorentzVector track);
    bool             pass_inv_mass(event evnt);
    event            GetEvent(double entry);
    double           GetEntries();
@@ -155,18 +155,22 @@ Int_t driver::Cut(Long64_t entry)
 
 int driver::Select_Lepton(event evnt)
 {
+// Selects which of the two leptons undergoes a dark brem. Weights the choice by the cross
+// section of each particle, which differs due to their energies. Returns a 1 if the positive
+// lepton brems, and a -1 if the negative one does. Returns 0 if both cross sections are zero.
   double MuPlusE = evnt.mu_pos_vec.E();
   double MuMinusE = evnt.mu_neg_vec.E();
   double pWeight = dphoton->GetsigmaTot(MuPlusE);
   double mWeight = dphoton->GetsigmaTot(MuMinusE);
   if ((pWeight+mWeight)==0)
   {
-     std::cerr << "Cross section is zero for both leptons.\n";
+     //Can happen if the energies are too low, or out of range of the table.
+     std::cerr << "Cross section is zero for both leptons.\n"; 
      return 0;
   }
-  double A = drand48()*(pWeight+mWeight);
   if((pWeight<0))
-  { 
+  {
+     //Happens occasionally due to a bad function interpolation. 
      printf("Negative cross section, energy out of range, Failing E is %e\n",MuPlusE);
      return 0;
   }
@@ -175,12 +179,17 @@ int driver::Select_Lepton(event evnt)
      printf("Negative cross section, energy out of range, Failing E is %e\n",MuMinusE);
      return 0;
   }
+
+  //Make the selection.
+  double A = drand48()*(pWeight+mWeight);
   if (A<=pWeight) {return 1;}
   else {return -1;}
 }
 
 TLorentzVector   driver::simulate_dbrem(TLorentzVector initial)
 {
+   //Simulates the dark brem. Takes in the 4-vector of the incoming muon, returns 
+   //the 4-vector of the outgoing muon after the brem.
    double energy = initial.E();
    TVector3 UzVec = initial.Vect().Unit();
    TLorentzVector* outvec = (TLorentzVector*)dphoton->MuSimulateEmission(energy)->Clone();
@@ -190,6 +199,8 @@ TLorentzVector   driver::simulate_dbrem(TLorentzVector initial)
 
 bool driver::pass_inv_mass(event evnt)
 {
+//Invariant mass cut. Done before choosing the brem to avoid save simulation time and to
+//avoid events with zero cross sections.
    bool pass = true;
    TLorentzVector invmass = evnt.mu_neg_vec+evnt.mu_pos_vec;
    if ((invmass.M()<81.2)||(invmass.M()>101.2)) {pass=false;}
@@ -198,6 +209,8 @@ bool driver::pass_inv_mass(event evnt)
 
 bool driver::pass_cuts(event evnt)
 {
+//Make the cuts for the muon+track. Set to match those made for the disappearing tracks search.
+//"muon" refers the the lepton which does not brem, "track" refers to the one that does.
    bool pass = true;
    TLorentzVector muon, track;
    if(evnt.pbrem==1)
@@ -213,8 +226,7 @@ bool driver::pass_cuts(event evnt)
    else {pass=false;}
    if(pt_cuts(muon,track)==false) {pass=false;}
    else if(eta_cuts(muon,track)==false) {pass=false;}
-   else if(dr_cuts(muon,track)==false) {pass=false;}
-   
+   else if(dot_cuts(muon,track)==false) {pass=false;} 
    return pass;
 }
 
@@ -228,6 +240,8 @@ bool driver::pt_cuts(TLorentzVector muon, TLorentzVector track)
 
 bool driver::eta_cuts(TLorentzVector muon, TLorentzVector track)
 {
+//Eta cuts. The abs() function wasn't behaving as I expected, so needed to find the 
+//absolute value manually.
    bool pass = true;
    double m_eta = muon.Eta();
    double t_eta = track.Eta();
@@ -241,11 +255,17 @@ bool driver::eta_cuts(TLorentzVector muon, TLorentzVector track)
    return pass;
 }
 
-bool driver::dr_cuts(TLorentzVector muon, TLorentzVector track)
+bool driver::dot_cuts(TLorentzVector muon, TLorentzVector track)
 {
+//Cut on the dot product of the two 3-momenta. Makes sure the angle between the
+//muon and the track is at least 90 degrees.
    bool pass = true;
-   double dr = sqrt((track.Eta()-muon.Eta())*(track.Eta()-muon.Eta())+(track.Phi()-muon.Phi())*(track.Phi()-muon.Phi()));
-   if(dr<0.15) {pass=false;}
+   TLorentzVector z_bos = muon+track;
+   double p1dotp2 = muon.X()*track.X()+muon.Y()*track.Y()+muon.Z()*track.Z();
+   if(p1dotp2>0.) 
+   {
+      pass=false;
+   }
    return pass;
 }
 

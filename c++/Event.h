@@ -1,9 +1,17 @@
+/**
+ * Basic event class for storing Z-ll leptons.
+ * Michael Revering, University of Minnesota.
+ */
+
 #ifndef event_h
 #define event_h
 
 #include "TLorentzVector.h"
 
 class event
+//Stores the positive and negative leptons, as well as the information of the lepton before 
+//bremming. pbrem sets which lepton was selected, and is 1 for positive, -1 for negative, and 
+//zero for neither.
 {
    public:
       TLorentzVector mu_pos_vec;

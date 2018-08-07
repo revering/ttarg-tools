@@ -1,10 +1,17 @@
+/** 
+ * Class providing the plotting functionality for the dark brem simulation.
+ * Reese Peterson and Michael Revering, University of Minnesota.
+ **/
+
 #ifndef plotter_h
 #define plotter_h
 #include "TDirectory.h"
 #include "TLorentzVector.h"
 #include "TH1.h"
+#include "TFile.h"
 #include <string>
 #include "Event.h"
+#include "TMath.h"
 
 class Plotter {
   public:
